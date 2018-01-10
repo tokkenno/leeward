@@ -57,6 +57,7 @@
     <Compile Include="Protocol\Packet.cs" />
     <Compile Include="Protocol\PacketFactory.cs" />
     <Compile Include="Protocol\PacketType.cs" />
+    <Compile Include="Protocol\RequestIDPacket.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
