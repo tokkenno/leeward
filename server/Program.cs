@@ -1,4 +1,5 @@
 ﻿namespace server
+namespace Leeward
 {
     internal class Program
     {
