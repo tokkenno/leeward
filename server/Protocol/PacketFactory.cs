@@ -1,6 +1,6 @@
 ﻿namespace Leeward.Protocol
 {
-    internal class PacketFactory
+    internal static class PacketFactory
     {
         
     }

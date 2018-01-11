@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Leeward.Net
 {
-    public class TcpServer
+    internal abstract class TcpServer
     {
         private readonly ManualResetEvent _connAccepted = new ManualResetEvent(false);
         private Socket _socket;
@@ -40,10 +40,9 @@ namespace Leeward.Net
             _connAccepted.Set();  
 
             // Get the socket that handles the client request.  
-            Socket clientSock = this._socket.EndAccept(ar);  
-
-            // Create input connection. TODO: Save active connections
-            InputConnection state = new InputConnection(clientSock);
+            Socket clientSock = this._socket.EndAccept(ar);
         }
+
+        protected abstract void OnConnection(Socket sock);
     }
 }
