@@ -1,9 +1,14 @@
-﻿namespace Leeward.Protocol
+﻿using System;
+
+namespace Leeward.Protocol
 {
     internal class RequestIdPacket : Packet
     {
-        public RequestIdPacket() : base(PacketType.RequestID)
+        public readonly String Name;
+        
+        public RequestIdPacket(String name) : base(PacketType.RequestID)
         {
+            this.Name = name.Trim(); // TODO: Check
         }
     }
 }

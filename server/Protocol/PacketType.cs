@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Leeward.Protocol
 {
-    internal enum PacketType
+    internal enum PacketType : uint
     {
         Empty = 0,
         Error = 1,
