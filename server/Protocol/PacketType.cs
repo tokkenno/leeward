@@ -86,7 +86,6 @@ namespace Leeward.Protocol
         PlayerDisconnected = 77,         // 0x0000004D
         RequestHttpGet = 78,             // 0x0000004E
         UserPacket = 128,                // 0x00000080
-        HttpGet = 0x20544547,            // HTTP Request: GET
-        HttpPost = 0x54534f50            // HTTP Request: POST
+        HttpRequest = 542393671          // HTTP Request ("GET " ASCII)
     }
 }

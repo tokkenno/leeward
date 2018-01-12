@@ -1,47 +1,52 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
-using Leeward.Protocol;
+using System.Threading;
 
 namespace Leeward.Net
 {
-    internal abstract class InputConnection : Connection
+    delegate void MessageEventHandler(InputConnection connection, MemoryStream message);
+        
+    internal class InputConnection : Connection
     {
         private DateTime _lastReception;
-        
+        public DateTime LastSeen => _lastReception;
+
         private const int InputBufferSize = 8192;
         private byte[] _inputBuffer = new byte[InputBufferSize];
+
+        public event MessageEventHandler OnMessage;
         
         public InputConnection(Socket sock) : base(sock)
         {
             sock.BeginReceive(this._inputBuffer, 0, this._inputBuffer.Length, SocketFlags.None,
-                new AsyncCallback(this.OnReceive), (object) sock);
+                new AsyncCallback(this.ReceiveHandler), (object) sock);
         }
         
-        protected void OnReceive(IAsyncResult ar)
+        protected void ReceiveHandler(IAsyncResult ar)
         {
-            int bytesRead = this._socket.EndReceive(ar);
+            int bytesRead = this.Socket.EndReceive(ar);
             if (bytesRead > 0)
             {
                 this._lastReception = DateTime.Now;
-                using (MemoryStream msgData = new MemoryStream(this._inputBuffer, 0, bytesRead))
+
+                if (OnMessage != null)
                 {
-                    this.OnMessage(msgData);
+                    lock (OnMessage)
+                    {
+                        using (MemoryStream msgData = new MemoryStream(this._inputBuffer, 0, bytesRead))
+                        {
+                            this.OnMessage.Invoke(this, msgData);
+                        }
+                    }
                 }
-                Console.WriteLine(BitConverter.ToString(this._inputBuffer,0,bytesRead));
-                Console.WriteLine(Encoding.UTF8.GetString(this._inputBuffer, 0, bytesRead));
             }
         }
 
-        protected abstract void OnMessage(MemoryStream data);
-
-        protected void OnSend(IAsyncResult ar) {  
+        protected void SendHandler(IAsyncResult ar) {
             try { 
-                int bytesSent = this._socket.EndSend(ar);
+                int bytesSent = this.Socket.EndSend(ar);
             } catch (Exception e) {  
                 Console.WriteLine("Socket send error: " + e.ToString());  
             }  
@@ -49,12 +54,19 @@ namespace Leeward.Net
 
         public void Disconnect()
         {
-            
+            this.Socket.Shutdown(SocketShutdown.Both);
+            this.Socket.Disconnect(false);
+            Console.WriteLine("Client " + this.Ip.ToString() + " disconnected.");
+            // TODO: Handle well
         }
 
-        protected void Send(byte[] data)
+        public void Send(byte[] data)
         {
-            this._socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(OnSend), this._socket);
+            this.Socket.Send(data);
+        }
+        
+        public IAsyncResult SendAsync(byte[] data) {
+            return this.Socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendHandler), this.Socket);
         }
     }
 }

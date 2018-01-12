@@ -7,11 +7,11 @@ namespace Leeward.Net
     {
         public readonly IPAddress Ip;
         public readonly int Port;
-        protected readonly Socket _socket;
+        public readonly Socket Socket;
 
         public Connection(Socket sock)
         {
-            this._socket = sock;
+            this.Socket = sock;
 
             if (!(sock.RemoteEndPoint is IPEndPoint remoteEndPoint)) return;
             this.Ip = remoteEndPoint.Address;

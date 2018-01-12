@@ -1,30 +1,57 @@
 ﻿using System;
 using System.CodeDom;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Leeward.Protocol
 {
     internal static class PacketHandler
     {
-        public static Packet Handle(MemoryStream data)
+        public static List<Packet> Handle(MemoryStream data)
         {
+            List<Packet> packets = new List<Packet>();
+            
+            Console.WriteLine("==> " + BitConverter.ToString(data.ToArray()));
             using (BinaryReader dataReader = new BinaryReader(data))
             {
-                switch (dataReader.ReadUInt32())
+                uint expectedSize = dataReader.ReadUInt32();
+
+                if (expectedSize == 542393671) // TODO: Add other HTTP common headers
                 {
-                    case (uint) PacketType.RequestID: return HandleRequestId(dataReader);
-                    default: throw new Exception("Incorrect packet"); // TODO: Custom exception
+                    data.Position = 0;
+                    packets.Add(new HttpRequest(data));
+                }
+                else
+                {
+                    uint code = dataReader.ReadByte();
+                    
+                    switch (code)
+                    {
+                        case (uint) PacketType.RequestID: 
+                            packets.Add(HandleRequestId(dataReader));
+                            break;
+                        default: throw new UnrecognizedPacketException(code, data.Length);
+                    }
+
+                    if (expectedSize > data.Length)
+                    {
+                        packets.AddRange(Handle(data));
+                    }
                 }
             }
+
+            return packets;
         }
 
         public static RequestIdPacket HandleRequestId(BinaryReader dr)
         {
-            String name = dr.ReadString();
-            Object data = (Object) dr.Read(); // TODO: What the hell is this?
+            if (dr.ReadInt32() != 12)
+                throw new PacketMalformedException("Second parameter not expected");
             
             return new RequestIdPacket(
-                name
+                dr.ReadString()
             );
         }
     }

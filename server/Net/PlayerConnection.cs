@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using Leeward.Protocol;
 
@@ -7,26 +9,34 @@ namespace Leeward.Net
 {
     internal class PlayerConnection : InputConnection
     {
-        public PlayerConnection(Socket sock) : base(sock)
+        public PlayerConnection(InputConnection conn) : this(conn.Socket)
         {
         }
+        
+        public PlayerConnection(Socket sock) : base(sock)
+        {
+            this.OnMessage += new MessageEventHandler(MessageHandler);
+        }
 
-        protected override void OnMessage(MemoryStream data)
+        protected void MessageHandler(InputConnection conn, MemoryStream data)
         {
             try
             {
-                Packet message = PacketHandler.Handle(data);
+                List<Packet> messages = PacketHandler.Handle(data);
 
-                switch (message.Type)
+                foreach (Packet message in messages)
                 {
-                    case PacketType.RequestID:
-                        break;
-                    case PacketType.Disconnect:
-                        this.Disconnect();
-                        break;
+                    switch (message.Type)
+                    {
+                        case PacketType.RequestID:
+                            break;
+                        case PacketType.Disconnect:
+                            this.Disconnect();
+                            break;
+                    }
                 }
             }
-            catch (Exception) // TODO: Packet handler exception
+            catch (UnrecognizedPacketException upe) // TODO: Packet handler exception
             {
             }
         }
