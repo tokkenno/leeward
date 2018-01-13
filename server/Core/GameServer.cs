@@ -8,6 +8,7 @@ using System.Text;
 using Leeward.Entity;
 using Leeward.Net;
 using Leeward.Protocol;
+using Leeward.Protocol.Packets;
 
 namespace Leeward.Core
 {
@@ -16,6 +17,8 @@ namespace Leeward.Core
         private MessageEventHandler _newConnectionEventHandler;
 
         private int _httpServerPort = -1;
+        
+        private List<Player> _players = new List<Player>();
 
         public GameServer(int port) : base(new IPEndPoint(IPAddress.Any, port))
         {
@@ -23,10 +26,28 @@ namespace Leeward.Core
 
         private void AddPlayer(Player player)
         {
+            // Add to player list
+            this._players.Add(player);
+            
+            // Send to user his server Id
+            player.SendResponseId();
+            
+            // TODO: If server data don't exists, send to user ResponseReloadServerConfig
+            
+            // TODO: Update data on lobby server
+            
+            // TODO: Emit internal event
+            
+            // Handle new player messages
+            player.OnMessage += new PlayerMessageEventHandler(MessageHandler);
+            
+            // Send player connected event
+            player.SendPlayerConnected();
+            
             Console.WriteLine("New player: " + player.Name);
         }
 
-        #region Network methods
+        #region Network handler methods
 
         protected override void OnConnection(InputConnection connection)
         {
@@ -41,9 +62,6 @@ namespace Leeward.Core
 
         private void NewConnectionHandler(InputConnection connection, MemoryStream data)
         {
-            // Remove new connection handler. This isn't new already.
-            connection.OnMessage -= this._newConnectionEventHandler;
-            
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
@@ -63,6 +81,7 @@ namespace Leeward.Core
                         connection.Disconnect();
                         break;
                     case PacketType.RequestID:
+                        // TODO: Check bans. connection.Send(ResponseIdPacket.RejectPlayer().ToBinary());
                         this.AddPlayer(new Player((messages.First() as RequestIdPacket)?.Name,
                             new PlayerConnection(connection)));
                         break;
@@ -74,7 +93,28 @@ namespace Leeward.Core
                 Console.Error.WriteLine(ex.Message + " Client: " + connection.Ip.ToString() + ".");
                 connection.Disconnect();
             }
+            
+            // Remove new connection handler. This isn't new already.
+            connection.OnMessage -= this._newConnectionEventHandler;
         }
+
+        private void MessageHandler(Player player, MemoryStream data)
+        {
+            try
+            {
+                List<Packet> messages = PacketHandler.Handle(data);
+                throw new NotImplementedException();
+            }
+            catch (UnrecognizedPacketException ex)
+            {
+                Console.Error.WriteLine(ex.Message + " Client: " + player.Connection.Ip.ToString() + ".");
+                player.Connection.Disconnect();
+            }
+        }
+
+        #endregion
+
+        #region Network send methods
 
         #endregion
     }

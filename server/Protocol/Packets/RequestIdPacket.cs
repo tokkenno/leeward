@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Leeward.Protocol
+namespace Leeward.Protocol.Packets
 {
     internal class RequestIdPacket : Packet
     {

@@ -56,13 +56,16 @@
     <Compile Include="Net\TcpServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocol\HttpRequest.cs" />
     <Compile Include="Protocol\Packet.cs" />
     <Compile Include="Protocol\PacketFactory.cs" />
     <Compile Include="Protocol\PacketHandler.cs" />
     <Compile Include="Protocol\PacketMalformedException.cs" />
+    <Compile Include="Protocol\Packets\HttpRequest.cs" />
+    <Compile Include="Protocol\Packets\PlayerConnectedPacket.cs" />
+    <Compile Include="Protocol\Packets\RequestIdPacket.cs" />
+    <Compile Include="Protocol\Packets\ResponseIdPacket.cs" />
     <Compile Include="Protocol\PacketType.cs" />
-    <Compile Include="Protocol\RequestIDPacket.cs" />
+    <Compile Include="Protocol\ResponsePacket.cs" />
     <Compile Include="Protocol\UnrecognizedPacketException.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Leeward.Protocol
+namespace Leeward.Protocol.Packets
 {
     internal class HttpRequest : Packet
     {
