@@ -14,33 +14,45 @@ namespace Leeward.Protocol
         {
             List<Packet> packets = new List<Packet>();
             
-            Console.WriteLine("==> " + BitConverter.ToString(data.ToArray()));
-            using (BinaryReader dataReader = new BinaryReader(data))
+            Console.WriteLine("BIN   ==> " + BitConverter.ToString(data.ToArray()));
+            Console.WriteLine("ASCII ==> " + Encoding.ASCII.GetString(data.ToArray()));
+            
+            try
             {
-                uint expectedSize = dataReader.ReadUInt32();
-
-                if (expectedSize == 542393671) // TODO: Add other HTTP common headers
+                using (BinaryReader dataReader = new BinaryReader(data))
                 {
-                    data.Position = 0;
-                    packets.Add(new HttpRequest(data));
-                }
-                else
-                {
-                    uint code = dataReader.ReadByte();
-                    
-                    switch (code)
-                    {
-                        case (uint) PacketType.RequestID: 
-                            packets.Add(HandleRequestId(dataReader));
-                            break;
-                        default: throw new UnrecognizedPacketException(code, data.Length);
-                    }
+                    uint expectedSize = dataReader.ReadUInt32();
 
-                    if (expectedSize > data.Length)
+                    if (expectedSize == 542393671) // TODO: Add other HTTP common headers
                     {
-                        packets.AddRange(Handle(data));
+                        data.Position = 0;
+                        packets.Add(new HttpRequest(data));
+                    }
+                    else
+                    {
+                        uint code = dataReader.ReadByte();
+
+                        switch (code)
+                        {
+                            case (uint) PacketType.RequestID:
+                                packets.Add(HandleRequestId(dataReader));
+                                break;
+                            case (uint) PacketType.RequestSetAlias:
+                                packets.Add(HandleRequestSetAlias(dataReader));
+                                break;
+                            default: throw new UnrecognizedPacketException(code, data.Length);
+                        }
+
+                        if (expectedSize > data.Length)
+                        {
+                            packets.AddRange(Handle(data));
+                        }
                     }
                 }
+            }
+            catch (ArgumentException er)
+            {
+                Console.WriteLine("The packet can't be readed: " + data.CanRead); // TODO: DEBUG ONLY, DELETE
             }
 
             return packets;
@@ -52,6 +64,13 @@ namespace Leeward.Protocol
                 throw new PacketMalformedException("Second parameter not expected");
             
             return new RequestIdPacket(
+                dr.ReadString()
+            );
+        }
+
+        public static RequestSetAliasPacket HandleRequestSetAlias(BinaryReader dr)
+        {
+            return new RequestSetAliasPacket(
                 dr.ReadString()
             );
         }
