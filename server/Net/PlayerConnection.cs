@@ -15,30 +15,6 @@ namespace Leeward.Net
         
         public PlayerConnection(Socket sock) : base(sock)
         {
-            this.OnMessage += new MessageEventHandler(MessageHandler);
-        }
-
-        protected void MessageHandler(InputConnection conn, MemoryStream data)
-        {
-            try
-            {
-                List<Packet> messages = PacketHandler.Handle(data);
-
-                foreach (Packet message in messages)
-                {
-                    switch (message.Type)
-                    {
-                        case PacketType.RequestID:
-                            break;
-                        case PacketType.Disconnect:
-                            this.Disconnect();
-                            break;
-                    }
-                }
-            }
-            catch (UnrecognizedPacketException upe) // TODO: Packet handler exception
-            {
-            }
         }
     }
 }
