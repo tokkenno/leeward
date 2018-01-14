@@ -29,6 +29,11 @@ namespace Leeward.Protocol.Packets
             }
         }
 
+        public override string ToString()
+        {
+            return $"Packet(ResponseId) <= Id: {this.Id}, Connected: {this.ConnectedAt}"; 
+        }
+
         public static ResponsePacket RejectPlayer()
         {
             return new ResponseIdPacket(-1, default(DateTime));

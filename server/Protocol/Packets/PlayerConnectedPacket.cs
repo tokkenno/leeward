@@ -20,5 +20,10 @@ namespace Leeward.Protocol.Packets
             outWriter.Write(this.Id);
             outWriter.Write(Encoding.ASCII.GetBytes(this.Name));
         }
+
+        public override string ToString()
+        {
+            return $"Packet(PlayerConnected) <= Id: {this.Id}, Name: {this.Name}"; 
+        }
     }
 }

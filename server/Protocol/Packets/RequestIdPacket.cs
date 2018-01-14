@@ -10,5 +10,10 @@ namespace Leeward.Protocol.Packets
         {
             this.Name = name.Trim(); // TODO: Check
         }
+
+        public override string ToString()
+        {
+            return $"Packet(RequestId) => Name: {this.Name}"; 
+        }
     }
 }

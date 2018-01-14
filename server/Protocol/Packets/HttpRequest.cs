@@ -7,5 +7,10 @@ namespace Leeward.Protocol.Packets
         public HttpRequest(MemoryStream data) : base(PacketType.HttpRequest)
         {
         }
+
+        public override string ToString()
+        {
+            return "Generic HTTP Request"; 
+        }
     }
 }

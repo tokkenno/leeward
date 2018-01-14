@@ -103,6 +103,7 @@ namespace Leeward.Core
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
+                messages.ForEach((packet) => Console.WriteLine(packet.ToString()));
                 throw new NotImplementedException();
             }
             catch (UnrecognizedPacketException ex)

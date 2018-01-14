@@ -1,4 +1,6 @@
-﻿namespace Leeward.Protocol
+﻿using System;
+
+namespace Leeward.Protocol
 {
     internal abstract class Packet
     {
@@ -8,5 +10,7 @@
         {
             this.Type = type;
         }
+
+        public abstract override string ToString();
     }
 }
