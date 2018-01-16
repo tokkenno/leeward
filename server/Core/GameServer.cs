@@ -25,6 +25,10 @@ namespace Leeward.Core
         {
         }
 
+        /// <summary>
+        /// Add player to the server
+        /// </summary>
+        /// <param name="player">Player</param>
         private void AddPlayer(Player player)
         {
             // Add to player list
@@ -40,7 +44,7 @@ namespace Leeward.Core
             // TODO: Emit internal event
             
             // Handle new player messages
-            player.OnMessage += new PlayerMessageEventHandler(MessageHandler);
+            player.OnMessage += new PlayerMessageEventHandler(PlayerMessageHandler);
             
             // Send player connected event
             player.SendPlayerConnected();
@@ -50,6 +54,10 @@ namespace Leeward.Core
 
         #region Network handler methods
 
+        /// <summary>
+        /// Handle new connections
+        /// </summary>
+        /// <param name="connection">New connection</param>
         protected override void OnConnection(InputConnection connection)
         {
             // TODO: Save active connection list
@@ -61,6 +69,11 @@ namespace Leeward.Core
             connection.OnMessage += this._newConnectionEventHandler;
         }
 
+        /// <summary>
+        /// Handle new connection messages
+        /// </summary>
+        /// <param name="connection">Connection that send the message</param>
+        /// <param name="data">Message raw data</param>
         private void NewConnectionHandler(InputConnection connection, MemoryStream data)
         {
             try
@@ -104,7 +117,13 @@ namespace Leeward.Core
             connection.OnMessage -= this._newConnectionEventHandler;
         }
 
-        private void MessageHandler(Player player, MemoryStream data)
+        /// <summary>
+        /// Handle messages sended from a player
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="data"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        private void PlayerMessageHandler(Player player, MemoryStream data)
         {
             try
             {
