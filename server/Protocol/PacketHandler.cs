@@ -2,6 +2,7 @@
 using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Text;
 using Leeward.Protocol.Packets;
@@ -60,8 +61,8 @@ namespace Leeward.Protocol
 
         public static RequestIdPacket HandleRequestId(BinaryReader dr)
         {
-            if (dr.ReadInt32() != 12)
-                throw new PacketMalformedException("Second parameter not expected");
+            if (dr.ReadInt32() != Constants.ProtocolVersion)
+                throw new VersionNotFoundException("Protocol version not compatible.");
             
             return new RequestIdPacket(
                 dr.ReadString()

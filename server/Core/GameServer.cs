@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -89,6 +90,11 @@ namespace Leeward.Core
                 }
             }
             catch (UnrecognizedPacketException ex)
+            {
+                Console.Error.WriteLine(ex.Message + " Client: " + connection.Ip.ToString() + ".");
+                connection.Disconnect();
+            }
+            catch (VersionNotFoundException ex)
             {
                 Console.Error.WriteLine(ex.Message + " Client: " + connection.Ip.ToString() + ".");
                 connection.Disconnect();
