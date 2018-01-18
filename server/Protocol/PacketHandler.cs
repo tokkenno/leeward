@@ -29,7 +29,7 @@ namespace Leeward.Protocol
                     }
                     else
                     {
-                        expectedSize += 4;
+                        expectedSize += 4; // First int with packet size
                         uint code = dataReader.ReadByte();
                         
                         Console.WriteLine("BIN   ==> " + BitConverter.ToString(data.ToArray().Skip((int)skipSize).Take((int)expectedSize).ToArray()));
@@ -43,11 +43,14 @@ namespace Leeward.Protocol
                             case (uint) PacketType.RequestSetAlias:
                                 packets.Add(HandleRequestSetAlias(dataReader));
                                 break;
+                            case (uint) PacketType.RequestJoinChannel:
+                                packets.Add(HandleRequestJoinChannel(dataReader));
+                                break;
                             default: throw new UnrecognizedPacketException(code, data.Length - skipSize);
                         }
                         Console.WriteLine($"Data length: {data.Length - skipSize}");
                         Console.WriteLine($"Expected size: {expectedSize}");
-                        if ((data.Length - skipSize) > expectedSize) // First int with packet size
+                        if ((data.Length - skipSize) > expectedSize)
                         {
                             packets.AddRange(Handle(data, expectedSize + skipSize));
                         }
@@ -76,6 +79,17 @@ namespace Leeward.Protocol
         {
             return new RequestSetAliasPacket(
                 dr.ReadString()
+            );
+        }
+
+        public static RequestJoinChannelPacket HandleRequestJoinChannel(BinaryReader dr)
+        {
+            return new RequestJoinChannelPacket(
+                id:         dr.ReadInt32(),
+                password:   dr.ReadString(),
+                name:       dr.ReadString(),
+                persistent: dr.ReadBoolean(),
+                maxPlayers: dr.ReadUInt16()
             );
         }
     }

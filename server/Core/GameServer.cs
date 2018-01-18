@@ -133,6 +133,7 @@ namespace Leeward.Core
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
+                Console.WriteLine("Messages to handle: " + messages.Count);
                 messages.ForEach((packet) => Console.WriteLine(packet.ToString()));
                 throw new NotImplementedException();
             }
