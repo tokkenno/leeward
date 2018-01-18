@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Leeward.Protocol.Packets;
 
@@ -11,12 +12,9 @@ namespace Leeward.Protocol
 {
     internal static class PacketHandler
     {
-        public static List<Packet> Handle(MemoryStream data)
+        public static List<Packet> Handle(MemoryStream data, uint skipSize = 0)
         {
             List<Packet> packets = new List<Packet>();
-            
-            Console.WriteLine("BIN   ==> " + BitConverter.ToString(data.ToArray()));
-            Console.WriteLine("ASCII ==> " + Encoding.ASCII.GetString(data.ToArray()));
             
             try
             {
@@ -31,7 +29,11 @@ namespace Leeward.Protocol
                     }
                     else
                     {
+                        expectedSize += 4;
                         uint code = dataReader.ReadByte();
+                        
+                        Console.WriteLine("BIN   ==> " + BitConverter.ToString(data.ToArray().Skip((int)skipSize).Take((int)expectedSize).ToArray()));
+                        Console.WriteLine("ASCII ==> " + Encoding.ASCII.GetString(data.ToArray().Skip((int)skipSize).Take((int)expectedSize).ToArray()));
 
                         switch (code)
                         {
@@ -41,12 +43,13 @@ namespace Leeward.Protocol
                             case (uint) PacketType.RequestSetAlias:
                                 packets.Add(HandleRequestSetAlias(dataReader));
                                 break;
-                            default: throw new UnrecognizedPacketException(code, data.Length);
+                            default: throw new UnrecognizedPacketException(code, data.Length - skipSize);
                         }
-
-                        if (expectedSize > data.Length)
+                        Console.WriteLine($"Data length: {data.Length - skipSize}");
+                        Console.WriteLine($"Expected size: {expectedSize}");
+                        if ((data.Length - skipSize) > expectedSize) // First int with packet size
                         {
-                            packets.AddRange(Handle(data));
+                            packets.AddRange(Handle(data, expectedSize + skipSize));
                         }
                     }
                 }
