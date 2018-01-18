@@ -79,8 +79,9 @@ namespace Leeward.Core
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
+                Packet firstMessage = messages.FirstOrDefault();
 
-                switch (messages.First().Type) // FIX: RequestID is always an only packet?
+                switch (firstMessage?.Type) // FIX: RequestID is always an only packet?
                 {
                     case PacketType.HttpRequest:
                         if (this._httpServerPort > 0)
@@ -95,7 +96,11 @@ namespace Leeward.Core
                         connection.Disconnect();
                         break;
                     case PacketType.RequestID:
+                        RequestIdPacket reqId = firstMessage as RequestIdPacket;
+                        Player newPlayer = new Player(reqId?.Name, new PlayerConnection(connection));
+                        
                         // TODO: Check bans. connection.Send(ResponseIdPacket.RejectPlayer().ToBinary());
+                        connection.Send((new ResponseIdPacket(newPlayer)).ToBinary());
                         this.AddPlayer(new Player((messages.First() as RequestIdPacket)?.Name,
                             new PlayerConnection(connection)));
                         break;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using Leeward.Entity;
 
 namespace Leeward.Protocol.Packets
 {
@@ -8,7 +9,11 @@ namespace Leeward.Protocol.Packets
     {
         public readonly int Id;
         public readonly DateTime ConnectedAt;
-        
+
+        public ResponseIdPacket(Player player) : this(player.Id, player.ConnectedAt)
+        {
+        }
+
         public ResponseIdPacket(int id, DateTime connectedAt) : base(PacketType.ResponseID)
         {
             this.Id = id;
