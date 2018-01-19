@@ -1,7 +1,13 @@
-﻿namespace Leeward.IO
+﻿using System;
+using System.IO;
+
+namespace Leeward.IO
 {
-    public class Serializer
+    internal static class Serializer
     {
-        
+        public static void Write(this BinaryWriter writer, Configuration conf)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

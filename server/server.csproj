@@ -42,7 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\GameServer.cs" />
-    <Compile Include="Entity\Player.cs" />
+    <Compile Include="Core\Player.cs" />
+    <Compile Include="Core\Zone.cs" />
     <Compile Include="Geometry\Bounds.cs" />
     <Compile Include="Geometry\Quaternion.cs" />
     <Compile Include="Geometry\Rectangle.cs" />
@@ -50,6 +51,8 @@
     <Compile Include="Geometry\Vector3.cs" />
     <Compile Include="Geometry\Vector4.cs" />
     <Compile Include="Image\Color.cs" />
+    <Compile Include="IO\Configuration.cs" />
+    <Compile Include="IO\Serializer.cs" />
     <Compile Include="Net\Connection.cs" />
     <Compile Include="Net\InputConnection.cs" />
     <Compile Include="Net\PlayerConnection.cs" />
@@ -63,10 +66,14 @@
     <Compile Include="Protocol\PacketMalformedException.cs" />
     <Compile Include="Protocol\Packets\HttpRequest.cs" />
     <Compile Include="Protocol\Packets\PlayerConnectedPacket.cs" />
-    <Compile Include="Protocol\Packets\RequestJoinChannelPacket.cs" />
+    <Compile Include="Protocol\Packets\RequestJoinZonePacket.cs" />
     <Compile Include="Protocol\Packets\RequestSetAliasPacket.cs" />
     <Compile Include="Protocol\Packets\RequestIdPacket.cs" />
+    <Compile Include="Protocol\Packets\RequestSetServerOptionPacket.cs" />
     <Compile Include="Protocol\Packets\ResponseIdPacket.cs" />
+    <Compile Include="Protocol\Packets\ResponseJoinZonePacket.cs" />
+    <Compile Include="Protocol\Packets\ResponseLeaveZonePacket.cs" />
+    <Compile Include="Protocol\Packets\ResponsePlayerJoinedPacket.cs" />
     <Compile Include="Protocol\PacketType.cs" />
     <Compile Include="Protocol\ResponsePacket.cs" />
     <Compile Include="Protocol\UnrecognizedPacketException.cs" />
@@ -76,7 +83,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="IO" />
     <Folder Include="Serialization" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

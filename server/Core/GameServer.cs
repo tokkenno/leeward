@@ -4,9 +4,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
-using Leeward.Entity;
+using Leeward.IO;
 using Leeward.Net;
 using Leeward.Protocol;
 using Leeward.Protocol.Packets;
@@ -20,6 +19,9 @@ namespace Leeward.Core
         private int _httpServerPort = -1;
         
         private List<Player> _players = new List<Player>();
+        private List<Zone> _zones = new List<Zone>();
+
+        private Configuration _gameConfiguration; // FIX: Load
 
         public GameServer(int port) : base(new IPEndPoint(IPAddress.Any, port))
         {
@@ -50,6 +52,14 @@ namespace Leeward.Core
             player.SendPlayerConnected();
             
             Console.WriteLine("New player: " + player.Name);
+        }
+
+        /// <summary>
+        /// Remove a player from the server and disconnect it
+        /// </summary>
+        /// <param name="player">Player</param>
+        private void RemovePlayer(Player player)
+        {
         }
 
         #region Network handler methods
@@ -133,15 +143,101 @@ namespace Leeward.Core
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
-                Console.WriteLine("Messages to handle: " + messages.Count);
-                messages.ForEach((packet) => Console.WriteLine(packet.ToString()));
-                throw new NotImplementedException();
+
+                foreach (Packet message in messages)
+                {
+                    switch (message.Type)
+                    {
+                        case PacketType.RequestJoinZone:
+                            if (!this.HandleJoinZoneRequest(player, (RequestJoinZonePacket) message)) return;
+                            break;
+                        default:
+                            Console.WriteLine(message.ToString());
+                            throw new NotImplementedException();
+                    }
+                }
             }
             catch (UnrecognizedPacketException ex)
             {
                 Console.Error.WriteLine(ex.Message + " Client: " + player.Connection.Ip.ToString() + ".");
                 player.Connection.Disconnect();
             }
+        }
+
+        /// <summary>
+        /// Handle a user message requesting join to zone
+        /// </summary>
+        /// <param name="player">Player who has request</param>
+        /// <param name="message">Request to join zone</param>
+        /// <returns></returns>
+        private bool HandleJoinZoneRequest(Player player, RequestJoinZonePacket message)
+        {
+            if (!message.IsLastVersion())
+            {
+                // TODO: player.SendMessage("Your client is outdated");
+                this.RemovePlayer(player);
+                return false;
+            }
+
+            int idToJoin = message.Id;
+
+            // If join by zone name, find id
+            if (idToJoin == -2)
+            {
+                // Get id, if exists, or set command to new channel mode
+                idToJoin = this._zones.First((zone) =>
+                    zone.IsOpen &&
+                    (string.IsNullOrEmpty(message.Name) || message.Name.Equals(zone.Name)) &&
+                    (zone.HasPassword || message.Password.Equals(zone.Password))
+                )?.Id ?? -1;
+            }
+            
+            // If join to new zone mode
+            if (idToJoin == -1)
+            {
+                // If zone name its not provided
+                if (string.IsNullOrEmpty(message.Name))
+                {
+                    player.Send((new ResponseJoinZonePacket(false, "No suitable channels found")).ToBinary());
+                    return true; // FIX: ?
+                }
+                else
+                {
+                    Zone newZone = new Zone(message.Name, message.Password, message.MaxPlayers, message.Persistent);
+                    this._zones.Add(newZone); // FIX: Any user can create a zone?
+                    idToJoin = newZone.Id;
+                }
+            }
+            
+            Zone joinZone = this._zones.First((zone) => zone.Id == idToJoin);
+
+            if (joinZone == null)
+            {
+                player.Send((new ResponseJoinZonePacket(false, "No suitable channels found")).ToBinary());
+                return true; // FIX: ?
+            }
+            else if (!joinZone.IsOpen)
+            {
+                player.Send((new ResponseJoinZonePacket(false, "The requested channel is closed")).ToBinary());
+                return true; // FIX: ?
+            }
+            else if (!joinZone.Password.Equals(message.Password))
+            {
+                player.Send((new ResponseJoinZonePacket(false, "Wrong password")).ToBinary());
+                return true; // FIX: ?
+            }
+            else
+            {
+                if (player.CurrentZone != joinZone)
+                {
+                    if (player.CurrentZone != null) player.LeaveZone();
+                    if (this._gameConfiguration != null) 
+                        player.Send((new RequestSetServerOptionPacket(this._gameConfiguration)).ToBinary());
+                    player.JoinZone(joinZone);
+                }
+            }
+
+            return true;
         }
 
         #endregion

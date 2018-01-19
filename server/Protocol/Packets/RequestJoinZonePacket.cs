@@ -2,7 +2,7 @@
 
 namespace Leeward.Protocol.Packets
 {
-    internal class RequestJoinChannelPacket : Packet
+    internal class RequestJoinZonePacket : Packet
     {
         public readonly int Id;
         public readonly string Name;
@@ -10,7 +10,7 @@ namespace Leeward.Protocol.Packets
         public readonly int MaxPlayers;
         public readonly bool Persistent;
         
-        public RequestJoinChannelPacket(int id, string name, string password, int maxPlayers, bool persistent) : base(PacketType.RequestJoinChannel)
+        public RequestJoinZonePacket(int id, string name, string password, int maxPlayers, bool persistent) : base(PacketType.RequestJoinZone)
         {
             this.Id = id;
             this.Name = name.Trim();
@@ -19,9 +19,14 @@ namespace Leeward.Protocol.Packets
             this.Persistent = persistent;
         }
 
+        public bool IsLastVersion()
+        {
+            return this.Id == 10000 && this.Password == "1506310"; // TODO: Find what its 1506310
+        }
+
         public override string ToString()
         {
-            return $"Packet(RequestJoinChannel) => Id: {this.Id}, Name: {this.Name}, Password: {this.Password}, MaxPlayers: {this.MaxPlayers}, Persistent?: {this.Persistent}"; 
+            return $"Packet(RequestJoinZone) => Id: {this.Id}, Name: {this.Name}, Password: {this.Password}, MaxPlayers: {this.MaxPlayers}, Persistent?: {this.Persistent}"; 
         }
     }
 }

@@ -4,7 +4,7 @@ using Leeward.Net;
 using Leeward.Protocol.Packets;
 using Leeward.Utils;
 
-namespace Leeward.Entity
+namespace Leeward.Core
 {
     internal delegate void PlayerMessageEventHandler(Player player, System.IO.MemoryStream message);
 
@@ -20,6 +20,12 @@ namespace Leeward.Entity
 
         public DateTime ConnectedAt { get; }
 
+        private Zone _currentZone = null;
+        public Zone CurrentZone
+        {
+            get => this._currentZone;
+        }
+
         public readonly PlayerConnection Connection;
 
         public event PlayerMessageEventHandler OnMessage;
@@ -28,7 +34,7 @@ namespace Leeward.Entity
         {
             this.Connection = connection;
             this.Id = Player.UserIdGenerator.Next();
-            this.Name = name;
+            this.Name = string.IsNullOrWhiteSpace(name) ? "Guest" : name.Trim();
             this.ConnectedAt = DateTime.Now;
 
             connection.OnMessage +=
@@ -56,6 +62,27 @@ namespace Leeward.Entity
                 return _aliases.Contains(alias);
             }
         }
+
+        public void JoinZone(Zone newZone)
+        {
+            if (this.CurrentZone != newZone)
+            {
+                this._currentZone = newZone;
+                newZone.JoinPlayer(this);
+            }
+        }
+
+        public void LeaveZone()
+        {
+            if (this.CurrentZone != null)
+            {
+                this.CurrentZone.LeavePlayer(this);
+                this._currentZone = null;
+                this.Send((new ResponseLeaveZonePacket()).ToBinary());
+            }
+        }
+
+        public void Send(byte[] data) => this.Connection.Send(data);
 
         public void SendResponseId()
         {

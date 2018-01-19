@@ -43,7 +43,7 @@ namespace Leeward.Protocol
                             case (uint) PacketType.RequestSetAlias:
                                 packets.Add(HandleRequestSetAlias(dataReader));
                                 break;
-                            case (uint) PacketType.RequestJoinChannel:
+                            case (uint) PacketType.RequestJoinZone:
                                 packets.Add(HandleRequestJoinChannel(dataReader));
                                 break;
                             default: throw new UnrecognizedPacketException(code, data.Length - skipSize);
@@ -82,9 +82,9 @@ namespace Leeward.Protocol
             );
         }
 
-        public static RequestJoinChannelPacket HandleRequestJoinChannel(BinaryReader dr)
+        public static RequestJoinZonePacket HandleRequestJoinChannel(BinaryReader dr)
         {
-            return new RequestJoinChannelPacket(
+            return new RequestJoinZonePacket(
                 id:         dr.ReadInt32(),
                 password:   dr.ReadString(),
                 name:       dr.ReadString(),

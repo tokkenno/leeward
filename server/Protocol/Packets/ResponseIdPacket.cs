@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using Leeward.Entity;
+using Leeward.Core;
 
 namespace Leeward.Protocol.Packets
 {
