@@ -10,6 +10,8 @@ namespace Leeward.Net
         
     internal class InputConnection : Connection
     {
+        private static readonly Utils.Logger _logger = Utils.Logger.Get(typeof(InputConnection));
+
         private DateTime _lastReception;
         public DateTime LastSeen => _lastReception;
 
@@ -56,7 +58,7 @@ namespace Leeward.Net
         {
             this.Socket.Shutdown(SocketShutdown.Both);
             this.Socket.Disconnect(false);
-            Console.WriteLine("Client " + this.Ip.ToString() + " disconnected.");
+            _logger.Debug("Client " + this.Ip.ToString() + " disconnected.");
             // TODO: Handle well
         }
 

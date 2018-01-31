@@ -78,6 +78,7 @@
     <Compile Include="Protocol\ResponsePacket.cs" />
     <Compile Include="Protocol\UnrecognizedPacketException.cs" />
     <Compile Include="Utils\IdGenerator.cs" />
+    <Compile Include="Utils\Logger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

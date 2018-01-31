@@ -14,6 +14,8 @@ namespace Leeward.Core
 {
     internal class GameServer : TcpServer
     {
+        private static readonly Utils.Logger _logger = Utils.Logger.Get(typeof(GameServer));
+
         private MessageEventHandler _newConnectionEventHandler;
 
         private int _httpServerPort = -1;
@@ -51,7 +53,7 @@ namespace Leeward.Core
             // Send player connected event
             player.SendPlayerConnected();
             
-            Console.WriteLine("New player: " + player.Name);
+            _logger.Info($"New player <{player.Name}> connected from {player.Connection.Ip}");
         }
 
         /// <summary>
@@ -159,7 +161,7 @@ namespace Leeward.Core
             }
             catch (UnrecognizedPacketException ex)
             {
-                Console.Error.WriteLine(ex.Message + " Client: " + player.Connection.Ip.ToString() + ".");
+                _logger.Warning(ex.Message + " Client: " + player.Connection.Ip.ToString() + ".");
                 player.Connection.Disconnect();
             }
         }
