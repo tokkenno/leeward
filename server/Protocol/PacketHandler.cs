@@ -31,9 +31,6 @@ namespace Leeward.Protocol
                     {
                         expectedSize += 4; // First int with packet size
                         uint code = dataReader.ReadByte();
-                        
-                        Console.WriteLine("BIN   ==> " + BitConverter.ToString(data.ToArray().Skip((int)skipSize).Take((int)expectedSize).ToArray()));
-                        Console.WriteLine("ASCII ==> " + Encoding.ASCII.GetString(data.ToArray().Skip((int)skipSize).Take((int)expectedSize).ToArray()));
 
                         switch (code)
                         {
@@ -46,10 +43,14 @@ namespace Leeward.Protocol
                             case (uint) PacketType.RequestJoinZone:
                                 packets.Add(HandleRequestJoinChannel(dataReader));
                                 break;
-                            default: throw new UnrecognizedPacketException(code, data.Length - skipSize);
+                            default: 
+                                Console.WriteLine("BIN   ==> " + BitConverter.ToString(data.ToArray().Skip((int)skipSize).Take((int)expectedSize).ToArray()));
+                                Console.WriteLine("ASCII ==> " + Encoding.ASCII.GetString(data.ToArray().Skip((int)skipSize).Take((int)expectedSize).ToArray()));
+                                Console.WriteLine($"Data length: {data.Length - skipSize}");
+                                Console.WriteLine($"Expected size: {expectedSize}");
+                                throw new UnrecognizedPacketException(code, data.Length - skipSize);
                         }
-                        Console.WriteLine($"Data length: {data.Length - skipSize}");
-                        Console.WriteLine($"Expected size: {expectedSize}");
+                        
                         if ((data.Length - skipSize) > expectedSize)
                         {
                             packets.AddRange(Handle(data, expectedSize + skipSize));

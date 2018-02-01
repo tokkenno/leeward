@@ -44,7 +44,7 @@ namespace Leeward.Utils
         {
             Task.Run(() =>
             {
-                String hour = DateTime.UtcNow.ToString("H:mm:ss.fff");
+                String hour = DateTime.Now.ToString("HH:mm:ss.fff");
                 switch(lvl)
                 {
                     case Level.Fatal:
