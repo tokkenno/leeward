@@ -50,8 +50,8 @@ namespace Leeward.Core
         {
             lock (_aliases)
             {
-                if (!_aliases.Contains(alias))
-                    this._aliases.Add(alias); // TODO: Check user unique alias globally?
+                if (alias != null && !_aliases.Contains(alias))
+                    this._aliases.Add(alias); // TODO: Check user unique alias globally
             }
         }
 

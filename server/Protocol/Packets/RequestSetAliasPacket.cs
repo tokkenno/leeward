@@ -13,7 +13,7 @@ namespace Leeward.Protocol.Packets
 
         public override string ToString()
         {
-            return $"Packet(RequestAlias) => Alias: {this.Alias}"; 
+            return $"Packet(RequestSetAlias) => Alias: {this.Alias}"; 
         }
     }
 }

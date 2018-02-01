@@ -88,6 +88,8 @@ namespace Leeward.Core
         /// <param name="data">Message raw data</param>
         private void NewConnectionHandler(InputConnection connection, MemoryStream data)
         {
+            _logger.Trace("C => S: " + BitConverter.ToString(data.ToArray()));
+            
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
@@ -112,21 +114,23 @@ namespace Leeward.Core
                         Player newPlayer = new Player(reqId?.Name, new PlayerConnection(connection));
                         
                         // TODO: Check bans. connection.Send(ResponseIdPacket.RejectPlayer().ToBinary());
-                        connection.Send((new ResponseIdPacket(newPlayer)).ToBinary());
                         this.AddPlayer(new Player((messages.First() as RequestIdPacket)?.Name,
                             new PlayerConnection(connection)));
                         break;
-                    default: break;
+                    default:
+                        _logger.Warning(
+                            $"Packet not expected on new connection from {connection.Ip}: {Enum.GetName(typeof(PacketType), firstMessage?.Type)}");
+                        break;
                 }
             }
             catch (UnrecognizedPacketException ex)
             {
-                Console.Error.WriteLine(ex.Message + " Client: " + connection.Ip.ToString() + ".");
+                _logger.Warning($"Unrecognized packet from client {connection.Ip}: {ex.Message}");
                 connection.Disconnect();
             }
             catch (VersionNotFoundException ex)
             {
-                Console.Error.WriteLine(ex.Message + " Client: " + connection.Ip.ToString() + ".");
+                _logger.Warning($"Protocol version mismatch from client {connection.Ip}: {ex.Message}");
                 connection.Disconnect();
             }
             
@@ -142,18 +146,25 @@ namespace Leeward.Core
         /// <exception cref="NotImplementedException"></exception>
         private void PlayerMessageHandler(Player player, MemoryStream data)
         {
+            _logger.Trace("C => S: " + BitConverter.ToString(data.ToArray()));
+            
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
-
+                _logger.Debug($"Handling messages: {string.Join(", ", messages.ConvertAll((p) => Enum.GetName(typeof(PacketType), p.Type)))}");
+                
                 foreach (Packet message in messages)
                 {
                     switch (message.Type)
                     {
-                        case PacketType.RequestJoinZone:
+                        /*case PacketType.RequestJoinZone:
                             if (!this.HandleJoinZoneRequest(player, (RequestJoinZonePacket) message)) return;
+                            break;*/
+                        case PacketType.RequestSetAlias:
+                            player.SetAlias((message as RequestSetAliasPacket)?.Alias);
                             break;
                         default:
+                            Console.WriteLine("Unrecognized message");
                             Console.WriteLine(message.ToString());
                             throw new NotImplementedException();
                     }
@@ -161,7 +172,7 @@ namespace Leeward.Core
             }
             catch (UnrecognizedPacketException ex)
             {
-                _logger.Warning(ex.Message + " Client: " + player.Connection.Ip.ToString() + ".");
+                _logger.Warning($"Unrecognized packet from client {player.Connection.Ip}: {ex.Message}");
                 player.Connection.Disconnect();
             }
         }
