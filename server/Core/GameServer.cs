@@ -88,12 +88,11 @@ namespace Leeward.Core
         /// <param name="data">Message raw data</param>
         private void NewConnectionHandler(InputConnection connection, MemoryStream data)
         {
-            _logger.Trace("C => S: " + BitConverter.ToString(data.ToArray()));
-            
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
                 Packet firstMessage = messages.FirstOrDefault();
+                _logger.Trace($"Client => Server: {firstMessage?.ToString()}");
 
                 switch (firstMessage?.Type) // FIX: RequestID is always an only packet?
                 {
@@ -111,17 +110,18 @@ namespace Leeward.Core
                         break;
                     case PacketType.RequestID:
                         RequestIdPacket reqId = firstMessage as RequestIdPacket;
-                        Player newPlayer = new Player(reqId?.Name, new PlayerConnection(connection));
+                        Player newPlayer = new Player(reqId?.Name, connection);
                         
                         // TODO: Check bans. connection.Send(ResponseIdPacket.RejectPlayer().ToBinary());
-                        this.AddPlayer(new Player((messages.First() as RequestIdPacket)?.Name,
-                            new PlayerConnection(connection)));
+                        this.AddPlayer(newPlayer);
                         break;
                     default:
                         _logger.Warning(
                             $"Packet not expected on new connection from {connection.Ip}: {Enum.GetName(typeof(PacketType), firstMessage?.Type)}");
                         break;
                 }
+                
+                if (messages.Count > 1) _logger.Warning("Multiple messages on new connection not expected.");
             }
             catch (UnrecognizedPacketException ex)
             {
@@ -146,12 +146,10 @@ namespace Leeward.Core
         /// <exception cref="NotImplementedException"></exception>
         private void PlayerMessageHandler(Player player, MemoryStream data)
         {
-            _logger.Trace("C => S: " + BitConverter.ToString(data.ToArray()));
-            
             try
             {
                 List<Packet> messages = PacketHandler.Handle(data);
-                _logger.Debug($"Handling messages: {string.Join(", ", messages.ConvertAll((p) => Enum.GetName(typeof(PacketType), p.Type)))}");
+                messages.ForEach((message) => _logger.Trace($"Player => Server: {message.ToString()}"));
                 
                 foreach (Packet message in messages)
                 {
@@ -164,8 +162,7 @@ namespace Leeward.Core
                             player.SetAlias((message as RequestSetAliasPacket)?.Alias);
                             break;
                         default:
-                            Console.WriteLine("Unrecognized message");
-                            Console.WriteLine(message.ToString());
+                            _logger.Warning($"Unrecognized message: {message.ToString()}");
                             throw new NotImplementedException();
                     }
                 }
@@ -211,7 +208,7 @@ namespace Leeward.Core
                 // If zone name its not provided
                 if (string.IsNullOrEmpty(message.Name))
                 {
-                    player.Send((new ResponseJoinZonePacket(false, "No suitable channels found")).ToBinary());
+                    player.Send(new ResponseJoinZonePacket(false, "No suitable channels found"));
                     return true; // FIX: ?
                 }
                 else
@@ -226,17 +223,17 @@ namespace Leeward.Core
 
             if (joinZone == null)
             {
-                player.Send((new ResponseJoinZonePacket(false, "No suitable channels found")).ToBinary());
+                player.Send(new ResponseJoinZonePacket(false, "No suitable channels found"));
                 return true; // FIX: ?
             }
             else if (!joinZone.IsOpen)
             {
-                player.Send((new ResponseJoinZonePacket(false, "The requested channel is closed")).ToBinary());
+                player.Send(new ResponseJoinZonePacket(false, "The requested channel is closed"));
                 return true; // FIX: ?
             }
             else if (!joinZone.Password.Equals(message.Password))
             {
-                player.Send((new ResponseJoinZonePacket(false, "Wrong password")).ToBinary());
+                player.Send(new ResponseJoinZonePacket(false, "Wrong password"));
                 return true; // FIX: ?
             }
             else
@@ -245,7 +242,7 @@ namespace Leeward.Core
                 {
                     if (player.CurrentZone != null) player.LeaveZone();
                     if (this._gameConfiguration != null) 
-                        player.Send((new RequestSetServerOptionPacket(this._gameConfiguration)).ToBinary());
+                        player.Send(new RequestSetServerOptionPacket(this._gameConfiguration));
                     player.JoinZone(joinZone);
                 }
             }

@@ -64,12 +64,10 @@ namespace Leeward.Net
 
         public void Send(byte[] data)
         {
-            _logger.Trace("S => C: " + BitConverter.ToString(data));
             this.Socket.Send(data);
         }
         
         public IAsyncResult SendAsync(byte[] data) {
-            _logger.Trace("S => C: " + BitConverter.ToString(data));
             return this.Socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendHandler), this.Socket);
         }
     }

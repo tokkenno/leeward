@@ -55,7 +55,6 @@
     <Compile Include="IO\Serializer.cs" />
     <Compile Include="Net\Connection.cs" />
     <Compile Include="Net\InputConnection.cs" />
-    <Compile Include="Net\PlayerConnection.cs" />
     <Compile Include="Net\TcpServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Leeward.Net;
+using Leeward.Protocol;
 using Leeward.Protocol.Packets;
 using Leeward.Utils;
 
@@ -10,6 +11,7 @@ namespace Leeward.Core
 
     internal class Player
     {
+        private static readonly Utils.Logger _logger = Utils.Logger.Get(typeof(Player));
         private static readonly SequentialIdGenerator UserIdGenerator = new SequentialIdGenerator();
             
         public int Id { get; }
@@ -26,11 +28,11 @@ namespace Leeward.Core
             get => this._currentZone;
         }
 
-        public readonly PlayerConnection Connection;
+        public readonly InputConnection Connection;
 
         public event PlayerMessageEventHandler OnMessage;
 
-        public Player(string name, PlayerConnection connection)
+        public Player(string name, InputConnection connection)
         {
             this.Connection = connection;
             this.Id = Player.UserIdGenerator.Next();
@@ -78,20 +80,24 @@ namespace Leeward.Core
             {
                 this.CurrentZone.LeavePlayer(this);
                 this._currentZone = null;
-                this.Send((new ResponseLeaveZonePacket()).ToBinary());
+                this.Send(new ResponseLeaveZonePacket());
             }
         }
 
-        public void Send(byte[] data) => this.Connection.Send(data);
+        public void Send(ResponsePacket packet)
+        {
+            _logger.Trace($"Server => Player: {packet.ToString()}");
+            this.Connection.Send(packet.ToBinary());
+        }
 
         public void SendResponseId()
         {
-            this.Connection.Send((new ResponseIdPacket(this.Id, this.ConnectedAt)).ToBinary());
+            this.Send(new ResponseIdPacket(this.Id, this.ConnectedAt));
         }
 
         public void SendPlayerConnected()
         {
-            this.Connection.Send((new PlayerConnectedPacket(this.Id, this.Name)).ToBinary());
+            this.Send(new PlayerConnectedPacket(this.Id, this.Name));
         }
     }
 }
