@@ -13,7 +13,7 @@ namespace Leeward.Utils
     internal class SequentialIdGenerator : IDGenerator
     {
         private readonly List<int> _ids = new List<int>();
-        private int _current = -1;
+        private int _current = 0;
         
         public int Next()
         {
