@@ -84,6 +84,12 @@ namespace Leeward.Core
             }
         }
 
+        public void Disconnect()
+        {
+            this.Send(new PlayerDisconnectedPacket(this.Id, this.Name));
+            this.Connection.Disconnect();
+        } 
+
         public void Send(ResponsePacket packet)
         {
             _logger.Trace($"Server => Player: {packet.ToString()}");

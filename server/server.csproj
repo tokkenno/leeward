@@ -65,6 +65,7 @@
     <Compile Include="Protocol\PacketMalformedException.cs" />
     <Compile Include="Protocol\Packets\HttpRequest.cs" />
     <Compile Include="Protocol\Packets\PlayerConnectedPacket.cs" />
+    <Compile Include="Protocol\Packets\PlayerDisconnectedPacket.cs" />
     <Compile Include="Protocol\Packets\RequestJoinZonePacket.cs" />
     <Compile Include="Protocol\Packets\RequestSetAliasPacket.cs" />
     <Compile Include="Protocol\Packets\RequestIdPacket.cs" />

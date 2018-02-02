@@ -62,6 +62,13 @@ namespace Leeward.Core
         /// <param name="player">Player</param>
         private void RemovePlayer(Player player)
         {
+            // TODO: Send message to other players
+            
+            // TODO: Leave the channel correctly
+            
+            this._players.Remove(player);
+            
+            player.Disconnect();
         }
 
         #region Network handler methods
