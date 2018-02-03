@@ -62,13 +62,19 @@ namespace Leeward.Core
         /// <param name="player">Player</param>
         private void RemovePlayer(Player player)
         {
-            // TODO: Send message to other players
-            
-            // TODO: Leave the channel correctly
-            
-            this._players.Remove(player);
-            
-            player.Disconnect();
+            lock (this._players)
+            {
+                if (this._players.Contains(player))
+                {
+                    // TODO: Send message to other players
+
+                    // TODO: Leave the channel correctly
+
+                    this._players.Remove(player);
+
+                    player.Disconnect();
+                }
+            }
         }
 
         #region Network handler methods
@@ -157,14 +163,14 @@ namespace Leeward.Core
             {
                 List<Packet> messages = PacketHandler.Handle(data);
                 messages.ForEach((message) => _logger.Trace($"Player => Server: {message.ToString()}"));
-                
+
                 foreach (Packet message in messages)
                 {
                     switch (message.Type)
                     {
-                        /*case PacketType.RequestJoinZone:
-                            if (!this.HandleJoinZoneRequest(player, (RequestJoinZonePacket) message)) return;
-                            break;*/
+                        case PacketType.RequestJoinZone:
+                            this.HandleJoinZoneRequest(player, (RequestJoinZonePacket) message);
+                            break;
                         case PacketType.RequestSetAlias:
                             player.SetAlias((message as RequestSetAliasPacket)?.Alias);
                             break;
@@ -177,7 +183,13 @@ namespace Leeward.Core
             catch (UnrecognizedPacketException ex)
             {
                 _logger.Warning($"Unrecognized packet from client {player.Connection.Ip}: {ex.Message}");
-                player.Connection.Disconnect();
+                player.Disconnect();
+            }
+            catch (PlayerRejectedException rejected)
+            {
+                _logger.Debug($"Player {player.Name} rejected: {rejected.Message}");
+                // TODO: rejected.Player.SendMessage(rejected.Message);
+                this.RemovePlayer(rejected.Player);
             }
         }
 
@@ -187,13 +199,11 @@ namespace Leeward.Core
         /// <param name="player">Player who has request</param>
         /// <param name="message">Request to join zone</param>
         /// <returns></returns>
-        private bool HandleJoinZoneRequest(Player player, RequestJoinZonePacket message)
+        private void HandleJoinZoneRequest(Player player, RequestJoinZonePacket message)
         {
             if (!message.IsLastVersion())
             {
-                // TODO: player.SendMessage("Your client is outdated");
-                this.RemovePlayer(player);
-                return false;
+                throw new PlayerRejectedException(player, "Your client is outdated");
             }
 
             int idToJoin = message.Id;
@@ -216,7 +226,7 @@ namespace Leeward.Core
                 if (string.IsNullOrEmpty(message.Name))
                 {
                     player.Send(new ResponseJoinZonePacket(false, "No suitable channels found"));
-                    return true; // FIX: ?
+                    return;
                 }
                 else
                 {
@@ -231,30 +241,22 @@ namespace Leeward.Core
             if (joinZone == null)
             {
                 player.Send(new ResponseJoinZonePacket(false, "No suitable channels found"));
-                return true; // FIX: ?
             }
             else if (!joinZone.IsOpen)
             {
                 player.Send(new ResponseJoinZonePacket(false, "The requested channel is closed"));
-                return true; // FIX: ?
             }
             else if (!joinZone.Password.Equals(message.Password))
             {
                 player.Send(new ResponseJoinZonePacket(false, "Wrong password"));
-                return true; // FIX: ?
             }
-            else
+            else if (player.CurrentZone != joinZone)
             {
-                if (player.CurrentZone != joinZone)
-                {
-                    if (player.CurrentZone != null) player.LeaveZone();
-                    if (this._gameConfiguration != null) 
-                        player.Send(new RequestSetServerOptionPacket(this._gameConfiguration));
-                    player.JoinZone(joinZone);
-                }
+                if (player.CurrentZone != null) player.LeaveZone();
+                if (this._gameConfiguration != null) 
+                    player.Send(new RequestSetServerOptionPacket(this._gameConfiguration));
+                player.JoinZone(joinZone);
             }
-
-            return true;
         }
 
         #endregion

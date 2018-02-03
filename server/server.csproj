@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Core\GameServer.cs" />
     <Compile Include="Core\Player.cs" />
+    <Compile Include="Core\PlayerRejectedException.cs" />
     <Compile Include="Core\Zone.cs" />
     <Compile Include="Geometry\Bounds.cs" />
     <Compile Include="Geometry\Quaternion.cs" />
