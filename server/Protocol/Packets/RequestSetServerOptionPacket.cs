@@ -5,9 +5,9 @@ namespace Leeward.Protocol.Packets
 {
     internal class RequestSetServerOptionPacket : ResponsePacket
     {
-        public readonly Configuration Config;
+        public readonly Configuration.Configuration Config;
 
-        public RequestSetServerOptionPacket(Configuration config) : base(PacketType.RequestSetServerOption)
+        public RequestSetServerOptionPacket(Configuration.Configuration config) : base(PacketType.RequestSetServerOption)
         {
             this.Config = config;
         }

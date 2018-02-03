@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using Leeward.IO;
+using Leeward.Configuration;
 using Leeward.Net;
 using Leeward.Protocol;
 using Leeward.Protocol.Packets;
@@ -23,7 +23,8 @@ namespace Leeward.Core
         private List<Player> _players = new List<Player>();
         private List<Zone> _zones = new List<Zone>();
 
-        private Configuration _gameConfiguration; // FIX: Load
+        private GameConfiguration _gameConfiguration;
+        private ServerConfiguration _serverConfiguration = ServerConfiguration.Load();
 
         public GameServer(int port) : base(new IPEndPoint(IPAddress.Any, port))
         {

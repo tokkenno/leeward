@@ -1,14 +1,21 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace Leeward.Image
 {
+    [DataContract]  
     public class Color
     {
+        [DataMember(Name = "r")] 
         public byte Red { get; set; }
+        [DataMember(Name = "g")] 
         public byte Green { get; set; }
+        [DataMember(Name = "b")] 
         public byte Blue { get; set; }
+        [DataMember(Name = "a")] 
         public byte Alpha { get; set; }
 
         public Color() : this(0x00, 0x00, 0x00)
