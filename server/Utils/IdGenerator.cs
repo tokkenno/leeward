@@ -19,7 +19,7 @@ namespace Leeward.Utils
         {
             lock (this._ids)
             {
-                if (_ids.Count == _current + 1)
+                if (_ids.Count == _current)
                 {
                     this._current += 1;
                     this._ids.Add(this._current);

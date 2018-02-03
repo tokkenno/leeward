@@ -22,7 +22,7 @@ namespace Leeward.Protocol.Packets
 
         protected override void Write(BinaryWriter outWriter)
         {
-            if (this.Id >= 0)
+            if (this.Id > 0)
             {
                 outWriter.Write(12);
                 outWriter.Write(this.Id);
