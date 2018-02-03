@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Leeward.Net
 {
-    delegate void MessageEventHandler(InputConnection connection, MemoryStream message);
+    internal delegate void MessageEventHandler(InputConnection connection, MemoryStream message);
         
     internal class InputConnection : Connection
     {
@@ -44,14 +44,9 @@ namespace Leeward.Net
                     }
                 }
             }
-        }
-
-        protected void SendHandler(IAsyncResult ar) {
-            try { 
-                int bytesSent = this.Socket.EndSend(ar);
-            } catch (Exception e) {  
-                Console.WriteLine("Socket send error: " + e.ToString());  
-            }  
+            
+            Socket.BeginReceive(this._inputBuffer, 0, this._inputBuffer.Length, SocketFlags.None,
+                new AsyncCallback(this.ReceiveHandler), (object) Socket);
         }
 
         public void Disconnect()
@@ -69,6 +64,14 @@ namespace Leeward.Net
         
         public IAsyncResult SendAsync(byte[] data) {
             return this.Socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendHandler), this.Socket);
+        }
+
+        protected void SendHandler(IAsyncResult ar) {
+            try { 
+                int bytesSent = this.Socket.EndSend(ar);
+            } catch (Exception e) {  
+                _logger.Warning("Socket send error: " + e.ToString());  
+            }  
         }
     }
 }
