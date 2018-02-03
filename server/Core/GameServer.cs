@@ -236,9 +236,9 @@ namespace Leeward.Core
                 }
             }
             
-            Zone joinZone = this._zones.First((zone) => zone.Id == idToJoin);
+            Zone joinZone = this._zones.FirstOrDefault((zone) => zone.Id == idToJoin);
 
-            if (joinZone == null)
+            if (joinZone == default(Zone))
             {
                 player.Send(new ResponseJoinZonePacket(false, "No suitable channels found"));
             }
