@@ -22,8 +22,15 @@ namespace Leeward.Net
         
         public InputConnection(Socket sock) : base(sock)
         {
-            sock.BeginReceive(this._inputBuffer, 0, this._inputBuffer.Length, SocketFlags.None,
-                new AsyncCallback(this.ReceiveHandler), (object) sock);
+            try
+            {
+                sock.BeginReceive(this._inputBuffer, 0, this._inputBuffer.Length, SocketFlags.None,
+                    new AsyncCallback(this.ReceiveHandler), (object) sock);
+            }
+            catch (SocketException se)
+            {
+                this.Disconnect();
+            }
         }
         
         protected void ReceiveHandler(IAsyncResult ar)
@@ -44,34 +51,16 @@ namespace Leeward.Net
                     }
                 }
             }
-            
-            Socket.BeginReceive(this._inputBuffer, 0, this._inputBuffer.Length, SocketFlags.None,
-                new AsyncCallback(this.ReceiveHandler), (object) Socket);
-        }
 
-        public void Disconnect()
-        {
-            this.Socket.Shutdown(SocketShutdown.Both);
-            this.Socket.Disconnect(false);
-            _logger.Debug("Client " + this.Ip.ToString() + " disconnected.");
-            // TODO: Handle well
-        }
-
-        public void Send(byte[] data)
-        {
-            this.Socket.Send(data);
-        }
-        
-        public IAsyncResult SendAsync(byte[] data) {
-            return this.Socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendHandler), this.Socket);
-        }
-
-        protected void SendHandler(IAsyncResult ar) {
-            try { 
-                int bytesSent = this.Socket.EndSend(ar);
-            } catch (Exception e) {  
-                _logger.Warning("Socket send error: " + e.ToString());  
-            }  
+            try
+            {
+                Socket.BeginReceive(this._inputBuffer, 0, this._inputBuffer.Length, SocketFlags.None,
+                    new AsyncCallback(this.ReceiveHandler), (object) Socket);
+            }
+            catch (SocketException se)
+            {
+                this.Disconnect();
+            }
         }
     }
 }

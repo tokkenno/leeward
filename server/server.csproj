@@ -54,6 +54,7 @@
     <Compile Include="IO\Configuration.cs" />
     <Compile Include="IO\Serializer.cs" />
     <Compile Include="Net\Connection.cs" />
+    <Compile Include="Net\ConnectionClosedException.cs" />
     <Compile Include="Net\InputConnection.cs" />
     <Compile Include="Net\TcpServer.cs" />
     <Compile Include="Program.cs" />
