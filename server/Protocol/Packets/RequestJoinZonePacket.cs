@@ -21,7 +21,7 @@ namespace Leeward.Protocol.Packets
 
         public bool IsLastVersion()
         {
-            return this.Id == 10000 && this.Password == "1506310"; // TODO: Find what its 1506310
+            return this.Id == 10000 && this.Password.Equals("1508310"); // TODO: Find what its 1508310, 2015/08/31?
         }
 
         public override string ToString()
