@@ -18,7 +18,7 @@ namespace Leeward.Protocol.Packets
         protected override void Write(BinaryWriter outWriter)
         {
             outWriter.Write(this.Id);
-            outWriter.Write(Encoding.ASCII.GetBytes(this.Name));
+            outWriter.Write(StringToBytes(this.Name));
         }
 
         public override string ToString()

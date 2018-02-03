@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace Leeward.Protocol
 {
@@ -24,12 +27,17 @@ namespace Leeward.Protocol
                 
                 // Rewind and set size
                 data.Position = 0;
-                bwData.Write((uint)data.Length);
+                bwData.Write((uint)data.Length - 4);
                 
                 return data.ToArray();
             }
         }
 
         protected abstract void Write(BinaryWriter outWriter);
+
+        protected byte[] StringToBytes(String str)
+        {
+            return (new[] {(byte) str.Length}).Concat(Encoding.ASCII.GetBytes(str)).ToArray();
+        }
     }
 }
