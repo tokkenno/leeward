@@ -22,6 +22,12 @@ namespace Leeward.Core
 
         public DateTime ConnectedAt { get; }
 
+        private byte[] _data = null;
+        public byte[] Data
+        {
+            get => this._data;
+        }
+
         private Zone _currentZone = null;
         public Zone CurrentZone
         {
