@@ -79,7 +79,10 @@
     <Compile Include="Protocol\Packets\ResponseIdPacket.cs" />
     <Compile Include="Protocol\Packets\ResponseJoinZonePacket.cs" />
     <Compile Include="Protocol\Packets\ResponseLeaveZonePacket.cs" />
+    <Compile Include="Protocol\Packets\ResponseLockZonePacket.cs" />
     <Compile Include="Protocol\Packets\ResponsePlayerJoinedPacket.cs" />
+    <Compile Include="Protocol\Packets\ResponseSetHostPacket.cs" />
+    <Compile Include="Protocol\Packets\ResponseSetZoneDataPacket.cs" />
     <Compile Include="Protocol\PacketType.cs" />
     <Compile Include="Protocol\ResponsePacket.cs" />
     <Compile Include="Protocol\UnrecognizedPacketException.cs" />
