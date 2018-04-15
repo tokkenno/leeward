@@ -85,6 +85,7 @@
     <Compile Include="Protocol\UnrecognizedPacketException.cs" />
     <Compile Include="Utils\IdGenerator.cs" />
     <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Utils\RandomIdGenerator.cs" />
     <Compile Include="Utils\SequentialIdGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
