@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Leeward.Protocol.Packets;
 using Leeward.Utils;
 
@@ -14,8 +16,17 @@ namespace Leeward.Core
 
         private string _name;
         private string _password;
+        private string _data;
         private int _maxPlayers;
         private bool _persistent;
+        private bool _locked;
+        
+        /// <summary>
+        /// Player who host the zone
+        /// </summary>
+        private Player _host;
+
+        private List<Player> _players;
         
         public String Name
         {
@@ -35,7 +46,10 @@ namespace Leeward.Core
         public bool IsOpen {
             get { throw new NotImplementedException(); }
         }
-        
+
+        public List<Player> Players => this._players;
+        public int PlayersCount => this._players.Count;
+
         public Zone(String name, String password = "", int maxPlayers = 1, bool persistent = false, int id = -1)
         {
             this.Id = id == -1 ? ZoneIdGenerator.NextInt() : id;
@@ -52,9 +66,35 @@ namespace Leeward.Core
 
         public void JoinPlayer(Player player)
         {
-            throw new NotImplementedException();
+            // Send zone join info to player
+            player.JoinZone(this);
+            player.Send(new ResponseJoiningZonePacket(this));
+
+            // Send zone host config
+            lock (this._host)
+            {
+                if (this._host == null) this._host = player;
+            }
+            player.Send(new ResponseSetHostPacket(this._host));
+
+            // Send zone data
+            if (!String.IsNullOrEmpty(this._data))
+            {
+                player.Send(new ResponseSetZoneDataPacket(this._data));
+            }
+
+            // Load zone name
+            player.Send(new ResponseLoadLevelPacket(this._name));
             
-            this.SendMaster((new ResponsePlayerJoinedPacket(player)).ToBinary());
+            // TODO: Send created objects
+            // TODO: Send destroyed objects
+            // TODO: Send rpc
+            
+            // Send locked zone config
+            if (this._locked)
+                player.Send(new ResponseLockZonePacket(this._locked));
+            
+            // this.SendMaster((new ResponsePlayerJoinedPacket(player)).ToBinary());
         }
 
         public void LeavePlayer(Player p)
