@@ -218,41 +218,41 @@ namespace Leeward.Core
                     (string.IsNullOrEmpty(message.Name) || message.Name.Equals(zone.Name)) &&
                     (zone.HasPassword || message.Password.Equals(zone.Password))
                 )?.Id ?? -1;
-            }
             
-            // If join to new zone mode
-            if (idToJoin == -1)
-            {
-                // If zone name its not provided
-                if (string.IsNullOrEmpty(message.Name))
+                // If id and name is not provided
+                if (idToJoin == -1 && string.IsNullOrEmpty(message.Name))
                 {
-                    player.Send(new ResponseJoinZonePacket(false, "No suitable channels found"));
+                    player.Send(new ResponseJoinZonePacket(false, "No suitable zones found"));
                     return;
+                }
+            }
+
+            // If user is not in zone already
+            if (player.CurrentZone == null || player.CurrentZone.Id != idToJoin)
+            {
+                // Find zone. If the zone doesn't exists, create it
+                Zone joinZone = this._zones.FirstOrDefault((zone) => zone.Id == idToJoin);
+                
+                if (joinZone == default(Zone))
+                {
+                    joinZone = new Zone(message.Name, message.Password, message.MaxPlayers, message.Persistent);
+                    this._zones.Add(joinZone); // FIX: Any user can create a zone?
+                    _logger.Trace($"New zone created: {joinZone.Id}");
                 }
                 else
                 {
-                    Zone newZone = new Zone(message.Name, message.Password, message.MaxPlayers, message.Persistent);
-                    this._zones.Add(newZone); // FIX: Any user can create a zone?
-                    idToJoin = newZone.Id;
+                    if (!joinZone.IsOpen)
+                    {
+                        player.Send(new ResponseJoinZonePacket(false, "The requested zone is closed"));
+                        return;
+                    }
+                    else if (!joinZone.Password.Equals(message.Password))
+                    {
+                        player.Send(new ResponseJoinZonePacket(false, "Wrong password"));
+                        return;
+                    }
                 }
-            }
             
-            Zone joinZone = this._zones.FirstOrDefault((zone) => zone.Id == idToJoin);
-
-            if (joinZone == default(Zone))
-            {
-                player.Send(new ResponseJoinZonePacket(false, "No suitable channels found"));
-            }
-            else if (!joinZone.IsOpen)
-            {
-                player.Send(new ResponseJoinZonePacket(false, "The requested channel is closed"));
-            }
-            else if (!joinZone.Password.Equals(message.Password))
-            {
-                player.Send(new ResponseJoinZonePacket(false, "Wrong password"));
-            }
-            else if (player.CurrentZone != joinZone)
-            {
                 if (player.CurrentZone != null) player.LeaveZone();
                 if (this._gameConfiguration != null) 
                     player.Send(new RequestSetServerOptionPacket(this._gameConfiguration));
