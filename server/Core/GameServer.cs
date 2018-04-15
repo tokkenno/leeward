@@ -253,9 +253,9 @@ namespace Leeward.Core
                     }
                 }
             
-                if (player.CurrentZone != null) player.LeaveZone();
                 if (this._gameConfiguration != null) 
                     player.Send(new RequestSetServerOptionPacket(this._gameConfiguration));
+                
                 player.JoinZone(joinZone);
             }
         }
