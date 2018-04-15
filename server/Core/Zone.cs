@@ -8,7 +8,7 @@ namespace Leeward.Core
     {
         private const int MaxPlayersGlobal = 64;
         
-        private static readonly SequentialIdGenerator ZoneIdGenerator = new SequentialIdGenerator();
+        private static readonly RandomIdGenerator ZoneIdGenerator = new RandomIdGenerator(gap: 10000);
 
         public readonly int Id;
 
@@ -36,9 +36,9 @@ namespace Leeward.Core
             get { throw new NotImplementedException(); }
         }
         
-        public Zone(String name, String password = "", int maxPlayers = 1, bool persistent = false)
+        public Zone(String name, String password = "", int maxPlayers = 1, bool persistent = false, int id = -1)
         {
-            this.Id = ZoneIdGenerator.Next();
+            this.Id = id == -1 ? ZoneIdGenerator.NextInt() : id;
             this._name = name;
             this._password = password;
             this._maxPlayers = maxPlayers > 0 ? (maxPlayers > MaxPlayersGlobal ? MaxPlayersGlobal : maxPlayers) : 1;
@@ -47,7 +47,7 @@ namespace Leeward.Core
         
         ~Zone()
         {
-            Zone.ZoneIdGenerator.Free(this.Id);
+            Zone.ZoneIdGenerator.FreeInt(this.Id);
         }
 
         public void JoinPlayer(Player player)

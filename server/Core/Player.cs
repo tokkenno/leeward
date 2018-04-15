@@ -35,7 +35,7 @@ namespace Leeward.Core
         public Player(string name, InputConnection connection)
         {
             this.Connection = connection;
-            this.Id = Player.UserIdGenerator.Next();
+            this.Id = Player.UserIdGenerator.NextInt();
             this.Name = string.IsNullOrWhiteSpace(name) ? "Guest" : name.Trim();
             this.ConnectedAt = DateTime.Now;
 
@@ -45,7 +45,7 @@ namespace Leeward.Core
 
         ~Player()
         {
-            Player.UserIdGenerator.Free(this.Id);
+            Player.UserIdGenerator.FreeInt(this.Id);
         }
 
         public void SetAlias(string alias)
@@ -86,7 +86,7 @@ namespace Leeward.Core
 
         public void Disconnect()
         {
-            this.Send(new PlayerDisconnectedPacket(this.Id, this.Name));
+            this.Send(new PlayerDisconnectedPacket((int) this.Id, this.Name));
             this.Connection.Disconnect();
         } 
 
@@ -98,12 +98,12 @@ namespace Leeward.Core
 
         public void SendResponseId()
         {
-            this.Send(new ResponseIdPacket(this.Id, this.ConnectedAt));
+            this.Send(new ResponseIdPacket((int) this.Id, this.ConnectedAt));
         }
 
         public void SendPlayerConnected()
         {
-            this.Send(new PlayerConnectedPacket(this.Id, this.Name));
+            this.Send(new PlayerConnectedPacket((int) this.Id, this.Name));
         }
     }
 }
