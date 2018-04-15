@@ -75,6 +75,7 @@ namespace Leeward.Core
         {
             if (this.CurrentZone != newZone)
             {
+                this.LeaveZone();
                 this._currentZone = newZone;
                 newZone.JoinPlayer(this);
             }
